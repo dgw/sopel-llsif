@@ -88,7 +88,11 @@ def sif_card(bot, trigger):
         LOGGER.exception("LLSIF API error!")
         return
 
-    card = data['results'][0]
+    try:
+        card = data['results'][0]
+    except IndexError:
+        bot.reply("No card found!")
+        return
 
     card_id = card['id']
     character = card['idol']['name']
