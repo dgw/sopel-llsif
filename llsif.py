@@ -10,6 +10,7 @@ from __future__ import unicode_literals, absolute_import, print_function, divisi
 
 import requests
 
+from sopel.logger import get_logger
 from sopel import module
 
 
@@ -22,32 +23,59 @@ LATEST_CARD_PARAMS = {
     'japan_only': False,
 }
 
+CARD_SEARCH_PARAMS = {
+    'page_size': 1,
+    'japan_only': False,
+}
 
-@module.commands('sifcard')
-@module.example('.sifcard')
-def sif_card(bot, trigger):
-    """Fetch the latest card added to SIF (worldwide)."""
+
+LOGGER = get_logger(__name__)
+
+
+class APIError(Exception):
+    pass
+
+
+def _api_request(url, params):
     try:
-        r = requests.get(url=CARD_API, params=LATEST_CARD_PARAMS,
+        r = requests.get(url=url, params=params,
                          timeout=(10.0, 4.0))
     except requests.exceptions.ConnectTimeout:
-        bot.say("Connection timed out.")
-        return
+        raise APIError("Connection timed out.")
     except requests.exceptions.ConnectionError:
-        bot.say("Couldn't connect to server.")
-        return
+        raise APIError("Couldn't connect to server.")
     except requests.exceptions.ReadTimeout:
-        bot.say("Server took too long to send data.")
-        return
+        raise APIError("Server took too long to send data.")
     try:
         r.raise_for_status()
     except requests.exceptions.HTTPError as e:
-        bot.say("HTTP error: " + e.message)
-        return
+        raise APIError("HTTP error: " + e.message)
     try:
         data = r.json()
     except ValueError:
-        bot.say("Couldn't decode API response: " + r.content)
+        raise APIError("Couldn't decode API response: " + r.content)
+
+    return data
+
+
+@module.commands('sifcard')
+@module.example('.sifcard')
+@module.example('.sifcard 123')
+def sif_card(bot, trigger):
+    """Fetch LLSIF EN/WW card information."""
+    if trigger.group(2):
+        params = CARD_SEARCH_PARAMS.copy()
+        params.update({'ids': trigger.group(2)})
+        prefix = ""
+    else:
+        params = LATEST_CARD_PARAMS
+        prefix = "Latest SIF card: "
+
+    try:
+        data = _api_request(CARD_API, params)
+    except APIError as err:
+        bot.say("Sorry, something went wrong with the card API.")
+        LOGGER.exception("LLSIF API error!")
         return
 
     card = data['results'][0]
@@ -59,5 +87,5 @@ def sif_card(bot, trigger):
     released = card['release_date']
     link = card['website_url'].replace('http:', 'https:', 1)
 
-    bot.say("Latest SIF WW card: {} {} {} (#{}), released {} — {}"
-            .format(character, attribute, rarity, card_id, released, link))
+    bot.say("{}{} {} {} (#{}), released {} — {}"
+            .format(prefix, character, attribute, rarity, card_id, released, link))
