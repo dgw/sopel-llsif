@@ -8,6 +8,8 @@ https://sopel.chat
 """
 from __future__ import unicode_literals, absolute_import, print_function, division
 
+import re
+
 import requests
 
 from sopel.logger import get_logger
@@ -25,7 +27,6 @@ LATEST_CARD_PARAMS = {
 
 CARD_SEARCH_PARAMS = {
     'page_size': 1,
-    'japan_only': False,
 }
 
 
@@ -60,16 +61,25 @@ def _api_request(url, params):
 
 @module.commands('sifcard')
 @module.example('.sifcard')
+@module.example('.sifcard jp')
 @module.example('.sifcard 123')
 def sif_card(bot, trigger):
     """Fetch LLSIF EN/WW card information."""
-    if trigger.group(2):
+    arg = trigger.group(2)
+    if arg is None or arg.lower() in ['en', 'ww']:
+        params = LATEST_CARD_PARAMS
+        prefix = "Latest SIF EN/WW card: "
+    elif arg.lower() == 'jp':
+        params = LATEST_CARD_PARAMS.copy()
+        del params['japan_only']
+        prefix = "Latest SIF JP card: "
+    else:
+        if re.search(r'[^\d]', arg):
+            bot.reply("I can only search by card ID number right now. :(")
+            return
         params = CARD_SEARCH_PARAMS.copy()
         params.update({'ids': trigger.group(2)})
         prefix = ""
-    else:
-        params = LATEST_CARD_PARAMS
-        prefix = "Latest SIF card: "
 
     try:
         data = _api_request(CARD_API, params)
