@@ -13,11 +13,12 @@ import re
 import requests
 
 from sopel.logger import get_logger
-from sopel import module
+from sopel import formatting, module
 
 
 API_BASE = 'https://schoolido.lu/api/'
 CARD_API = API_BASE + 'cards/'
+SONG_API = API_BASE + 'songs/'
 
 LATEST_CARD_PARAMS = {
     'ordering': '-id',
@@ -25,7 +26,7 @@ LATEST_CARD_PARAMS = {
     'japan_only': False,
 }
 
-CARD_SEARCH_PARAMS = {
+COMMON_SEARCH_PARAMS = {
     'page_size': 1,
 }
 
@@ -77,7 +78,7 @@ def sif_card(bot, trigger):
         if re.search(r'[^\d]', arg):
             bot.reply("I can only search by card ID number right now. :(")
             return
-        params = CARD_SEARCH_PARAMS.copy()
+        params = COMMON_SEARCH_PARAMS.copy()
         params.update({'ids': trigger.group(2)})
         prefix = ""
 
@@ -103,3 +104,69 @@ def sif_card(bot, trigger):
 
     bot.say("{}{} {} {} (#{}), released {} — {}"
             .format(prefix, character, attribute, rarity, card_id, released, link))
+
+
+@module.commands('sifsong')
+@module.example('.sifsong snow halation')
+def sif_song(bot, trigger):
+    """Look up LLSIF live show information."""
+    params = COMMON_SEARCH_PARAMS.copy()
+    if not trigger.group(2):
+        params.update({'ordering': 'random'})
+    else:
+        params.update({'search': trigger.group(2)})
+
+    try:
+        data = _api_request(SONG_API, params)
+    except APIError:
+        bot.say("Sorry, something went wrong with the song API.")
+        LOGGER.exception("LLSIF API error!")
+        return
+
+    try:
+        song = data['results'][0]
+    except IndexError:
+        bot.reply("No song found!")
+        return
+
+    title = song['name']
+    romaji_title = song['romaji_name']
+    english_title = song['translated_name']
+    main_unit = song['main_unit']
+    attribute = song['attribute']
+    rotation = song['daily_rotation'] or 'A'  # API gives null if not B-sides, for some reason
+    duration = song['time']
+    duration = "{}:{:0>2}".format(duration // 60, duration % 60)
+
+    title_extras = ''
+    if romaji_title or english_title:
+        title_extras = ' ({})'.format(', '.join(filter(None, [
+            formatting.italic(romaji_title) if romaji_title else '',
+            '"{}"'.format(english_title) if english_title else '',
+        ])))
+
+    difficulties = []
+    for level in ['easy', 'normal', 'hard', 'expert', 'master']:
+        key_notes = level + '_notes'
+        key_stars = level + '_difficulty'
+        # skip difficulty level if it has null for either value
+        if song[key_notes] and song[key_stars]:
+            difficulties.append(
+                '{}: {}🟊, {} notes'.format(
+                    level.title(),
+                    song[key_stars],
+                    song[key_notes],
+                )
+            )
+
+    bot.say("{}{} [{}] | {}, in {} {} — {}"
+        .format(
+            title,
+            title_extras,
+            duration,
+            attribute,
+            main_unit,
+            'Hits' if rotation == 'A' else 'B-sides',
+            ' | '.join(difficulties),
+        )
+    )
