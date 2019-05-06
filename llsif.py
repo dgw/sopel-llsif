@@ -19,6 +19,7 @@ from sopel import formatting, module
 API_BASE = 'https://schoolido.lu/api/'
 CARD_API = API_BASE + 'cards/'
 SONG_API = API_BASE + 'songs/'
+CARD_ONE = CARD_API + "{}/"
 
 LATEST_CARD_PARAMS = {
     'ordering': '-id',
@@ -52,7 +53,7 @@ class APIError(Exception):
     pass
 
 
-def _api_request(url, params):
+def _api_request(url, params={}):
     try:
         r = requests.get(url=url, params=params,
                          timeout=(10.0, 4.0))
@@ -94,6 +95,8 @@ def format_attribute(attribute):
 def sif_card(bot, trigger):
     """Fetch LLSIF EN/WW card information."""
     arg = trigger.group(2)
+    params = {}
+    url = CARD_API
     if arg is None or arg.lower() in ['en', 'ww']:
         params = LATEST_CARD_PARAMS
         prefix = "Latest SIF EN/WW card: "
@@ -102,27 +105,31 @@ def sif_card(bot, trigger):
         del params['japan_only']
         prefix = "Latest SIF JP card: "
     else:
-        params = COMMON_SEARCH_PARAMS.copy()
         prefix = ""
         if re.search(r'[^\d]', arg):
             # non-digits in query means run a keyword search
+            params = COMMON_SEARCH_PARAMS.copy()
             params.update({'search': arg})
         else:
             # query of only digits means run an ID number lookup
-            params.update({'ids': arg})
+            url = CARD_ONE.format(arg)
 
     try:
-        data = _api_request(CARD_API, params)
+        data = _api_request(url, params)
     except APIError as err:
         bot.say("Sorry, something went wrong with the card API.")
         LOGGER.exception("LLSIF API error!")
         return
 
-    try:
-        card = data['results'][0]
-    except IndexError:
-        bot.reply("No card found!")
-        return
+    if 'results' in data:
+        try:
+            card = data['results'][0]
+        except IndexError:
+            bot.reply("No card found!")
+            return
+    else:
+        # I'm sure this will bite me someday, but IDGAF
+        card = data
 
     card_id = card['id']
     character = card['idol']['name']
