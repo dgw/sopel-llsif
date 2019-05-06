@@ -54,11 +54,32 @@ ATTRIBUTES = {
 # point, and μ ≠ µ (confusingly, since in many fonts they look identical).
 UNIT_COLORS = {
     'μ\'s': 'E61788',
+    'bibi': 'FBDD01',
+    'lily white': 'EEFFDD',
+    'printemps': 'FABBDD',
+
     'aqours': '39A0E8',
+    'azalea': 'F54DCD',
+    'cyaron!': 'F8B646',
+    'guilty kiss': 'C398FF',
 }
 UNITS = {
     'μ\'s': formatting.hex_color('μ\'s', UNIT_COLORS['μ\'s']),
+    'bibi': formatting.hex_color('BiBi', UNIT_COLORS['bibi']),
+    'lily white': formatting.hex_color('Lily White', UNIT_COLORS['lily white']),
+    'printemps': formatting.hex_color('Printemps', UNIT_COLORS['printemps']),
+
     'aqours': formatting.hex_color('Aqours', UNIT_COLORS['aqours']),
+    'azalea': formatting.hex_color('Azalea', UNIT_COLORS['azalea']),
+    'cyaron!': formatting.hex_color('CYaRon!', UNIT_COLORS['cyaron!']),
+    'guilty kiss': formatting.hex_color('Guilty Kiss', UNIT_COLORS['guilty kiss']),
+}
+
+
+YEARS = {
+    'first': "1st",
+    'second': "2nd",
+    'third': "3rd",
 }
 
 
@@ -102,6 +123,11 @@ def format_attribute(attribute):
 
 def format_unit(unit):
     """Get formatted (colored, etc.) unit name string for output."""
+    if not unit:
+        # N cards, EXP/skill teachers, etc. don't have a unit name
+        return None
+
+    _unit = unit
     unit = unit.lower()
     if unit not in UNITS:
         for key in UNITS.keys():
@@ -109,7 +135,23 @@ def format_unit(unit):
                 unit = key
                 break
 
-    return UNITS[unit]
+    try:
+        return UNITS[unit]
+    except KeyError:
+        # Just give back the input unformatted if it's really, truly unknown
+        return _unit
+
+
+def format_year(year):
+    """Get formatted school year string for output."""
+    try:
+        year = year.lower()
+    except AttributeError:
+        # Teacher cards and other specials don't have a year
+        return None
+
+    return YEARS[year]
+
 
 
 @module.commands('sifcard')
@@ -163,6 +205,16 @@ def sif_card(bot, trigger):
     released = card['release_date']
     link = card['website_url'].replace('http:', 'https:', 1)
 
+    idol = card['idol']
+    try:
+        types = ', '.join(filter(None, [
+            format_unit(idol['main_unit']),
+            format_year(idol['year']),
+            format_unit(idol['sub_unit']),
+        ]))
+    except KeyError:
+        types = None
+
     collection = card.get('translated_collection', '')
     if not collection:
         # No localized name; use Japanese
@@ -177,13 +229,14 @@ def sif_card(bot, trigger):
         # Quote name in English style
         collection = '"{}"'.format(collection)
 
-    bot.say("{}{} {} {} (#{}{}), released {} — {}".format(
+    bot.say("{}{} {} {} (#{}{}{}), released {} — {}".format(
         prefix,
         character,
         attribute,
         rarity,
         card_id,
-        ', {} set'.format(collection) if collection else '',
+        '; {}'.format(types) if types else '',
+        '; {} set'.format(collection) if collection else '',
         released,
         link,
     ))
