@@ -266,6 +266,10 @@ def sif_card(bot, trigger):
     character = format_idol(card['idol']['name'])
     attribute = format_attribute(card['attribute'])
     rarity = card['rarity']
+    if card['is_promo']:
+        rarity = "Promo " + rarity
+    if card['is_special']:
+        rarity = "Special " + rarity
     released = card['release_date']
     link = card['website_url'].replace('http:', 'https:', 1)
 
