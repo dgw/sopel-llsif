@@ -49,6 +49,53 @@ ATTRIBUTES = {
 }
 
 
+IDOL_COLORS = {
+    'ayase eli': '36B3DD',
+    'hoshizora rin': 'F1C51F',
+    'koizumi hanayo': '54AB48',
+    'kousaka honoka': 'E2732D',
+    'minami kotori': '8C9395',
+    'nishikino maki': 'CC3554',
+    'sonoda umi': '1660A5',
+    'toujou nozomi': '744791',
+    'yazawa nico': 'D54E8D',
+
+    'kunikida hanamaru': 'E6D617',
+    'kurosawa dia': 'F23B4C',
+    'kurosawa ruby': 'FB75E4',
+    'matsuura kanan': '13E8AE',
+    'ohara mari': 'AE58EB',
+    'sakurauchi riko': 'E9A9E8',
+    'takami chika': 'F0A20B',
+    'tsushima yoshiko': '898989',
+    'watanabe you': '49B9F9',
+}
+IDOLS = {
+    'ayase eli': formatting.hex_color('Ayase Eli', IDOL_COLORS['ayase eli']),
+    'hoshizora rin': formatting.hex_color('Hoshizora Rin', IDOL_COLORS['hoshizora rin']),
+    'koizumi hanayo': formatting.hex_color('Koizumi Hanayo', IDOL_COLORS['koizumi hanayo']),
+    'kousaka honoka': formatting.hex_color('Kousaka Honoka', IDOL_COLORS['kousaka honoka']),
+    'minami kotori': formatting.hex_color('Minami Kotori', IDOL_COLORS['minami kotori']),
+    'nishikino maki': formatting.hex_color('Nishikino Maki', IDOL_COLORS['nishikino maki']),
+    'sonoda umi': formatting.hex_color('Sonoda Umi', IDOL_COLORS['sonoda umi']),
+    'toujou nozomi': formatting.hex_color('Toujou Nozomi', IDOL_COLORS['toujou nozomi']),
+    'yazawa nico': formatting.hex_color('Yazawa Nico', IDOL_COLORS['yazawa nico']),
+
+    'kunikida hanamaru': formatting.hex_color('Kunikida Hanamaru', IDOL_COLORS['kunikida hanamaru']),
+    'kurosawa dia': formatting.hex_color('Kurosawa Dia', IDOL_COLORS['kurosawa dia']),
+    'kurosawa ruby': formatting.hex_color('Kurosawa Ruby', IDOL_COLORS['kurosawa ruby']),
+    'matsuura kanan': formatting.hex_color('Matsuura Kanan', IDOL_COLORS['matsuura kanan']),
+    'ohara mari': formatting.hex_color('Ohara Mari', IDOL_COLORS['ohara mari']),
+    'sakurauchi riko': formatting.hex_color('Sakurauchi Riko', IDOL_COLORS['sakurauchi riko']),
+    'takami chika': formatting.hex_color('Takami Chika', IDOL_COLORS['takami chika']),
+    'tsushima yoshiko': formatting.hex_color(
+        'Tsushima {} Yohane'.format(formatting.strikethrough('Yoshiko')),
+        IDOL_COLORS['ayase eli']
+    ),
+    'watanabe you': formatting.hex_color('Watanabe You', IDOL_COLORS['watanabe you']),
+}
+
+
 # Make SURE to use a lowercase Greek mu (μ) if tweaking anything unit-related!
 # Typing <Compose>+mu on Linux yields a micro sign, which is a DIFFERENT code
 # point, and μ ≠ µ (confusingly, since in many fonts they look identical).
@@ -119,6 +166,23 @@ def format_attribute(attribute):
                 break
 
     return ATTRIBUTES[attribute]
+
+
+def format_idol(idol):
+    """Get formatted (colored, etc.) idol name string for output."""
+    _idol = idol
+    idol = idol.lower()
+    if idol not in IDOLS:
+        for key in IDOLS.keys():
+            if key.startswith(idol) or key.endswith(idol):
+                idol = key
+                break
+
+    try:
+        return IDOLS[idol]
+    except KeyError:
+        # Not one of the main girls; no color for her
+        return _idol
 
 
 def format_unit(unit):
@@ -199,7 +263,7 @@ def sif_card(bot, trigger):
         card = data
 
     card_id = card['id']
-    character = card['idol']['name']
+    character = format_idol(card['idol']['name'])
     attribute = format_attribute(card['attribute'])
     rarity = card['rarity']
     released = card['release_date']
