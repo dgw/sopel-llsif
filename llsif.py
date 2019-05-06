@@ -335,7 +335,7 @@ def sif_song(bot, trigger):
         bot.reply("No song found!")
         return
 
-    title = song['name']
+    title = formatting.hex_color(song['name'], ATTRIBUTE_COLORS[song['attribute'].lower()])
     romaji_title = song['romaji_name']
     english_title = song['translated_name']
     main_unit = format_unit(song['main_unit'])
