@@ -49,6 +49,19 @@ ATTRIBUTES = {
 }
 
 
+# Make SURE to use a lowercase Greek mu (μ) if tweaking anything unit-related!
+# Typing <Compose>+mu on Linux yields a micro sign, which is a DIFFERENT code
+# point, and μ ≠ µ (confusingly, since in many fonts they look identical).
+UNIT_COLORS = {
+    'μ\'s': 'E61788',
+    'aqours': '39A0E8',
+}
+UNITS = {
+    'μ\'s': formatting.hex_color('μ\'s', UNIT_COLORS['μ\'s']),
+    'aqours': formatting.hex_color('Aqours', UNIT_COLORS['aqours']),
+}
+
+
 class APIError(Exception):
     pass
 
@@ -85,6 +98,18 @@ def format_attribute(attribute):
                 break
 
     return ATTRIBUTES[attribute]
+
+
+def format_unit(unit):
+    """Get formatted (colored, etc.) unit name string for output."""
+    unit = unit.lower()
+    if unit not in UNITS:
+        for key in UNITS.keys():
+            if key.startswith(unit):
+                unit = key
+                break
+
+    return UNITS[unit]
 
 
 @module.commands('sifcard')
@@ -190,7 +215,7 @@ def sif_song(bot, trigger):
     title = song['name']
     romaji_title = song['romaji_name']
     english_title = song['translated_name']
-    main_unit = song['main_unit']
+    main_unit = format_unit(song['main_unit'])
     attribute = format_attribute(song['attribute'])
     rotation = song['daily_rotation'] or 'A'  # API gives null if not B-sides, for some reason
     duration = song['time']
