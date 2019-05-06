@@ -34,6 +34,20 @@ COMMON_SEARCH_PARAMS = {
 LOGGER = get_logger(__name__)
 
 
+ATTRIBUTE_COLORS = {
+    'smile': 'F16DB8',
+    'pure': '11BD11',
+    'cool': '41A2F5',
+    'all': 'C956FC',
+}
+ATTRIBUTES = {
+    'smile': formatting.hex_color('Smile', ATTRIBUTE_COLORS['smile']),
+    'pure': formatting.hex_color('Pure', ATTRIBUTE_COLORS['pure']),
+    'cool': formatting.hex_color('Cool', ATTRIBUTE_COLORS['cool']),
+    'all': formatting.hex_color('Universal', ATTRIBUTE_COLORS['all'])
+}
+
+
 class APIError(Exception):
     pass
 
@@ -58,6 +72,18 @@ def _api_request(url, params):
         raise APIError("Couldn't decode API response: " + r.content)
 
     return data
+
+
+def format_attribute(attribute):
+    """Get formatted (colored, etc.) attribute string for output."""
+    attribute = attribute.lower()
+    if attribute not in ATTRIBUTES:
+        for key in ATTRIBUTES.keys():
+            if key.startswith(attribute):
+                attribute = key
+                break
+
+    return ATTRIBUTES[attribute]
 
 
 @module.commands('sifcard')
@@ -97,7 +123,7 @@ def sif_card(bot, trigger):
 
     card_id = card['id']
     character = card['idol']['name']
-    attribute = card['attribute']
+    attribute = format_attribute(card['attribute'])
     rarity = card['rarity']
     released = card['release_date']
     link = card['website_url'].replace('http:', 'https:', 1)
@@ -133,7 +159,7 @@ def sif_song(bot, trigger):
     romaji_title = song['romaji_name']
     english_title = song['translated_name']
     main_unit = song['main_unit']
-    attribute = song['attribute']
+    attribute = format_attribute(song['attribute'])
     rotation = song['daily_rotation'] or 'A'  # API gives null if not B-sides, for some reason
     duration = song['time']
     duration = "{}:{:0>2}".format(duration // 60, duration % 60)
