@@ -229,14 +229,20 @@ def sif_card(bot, trigger):
         # Quote name in English style
         collection = '"{}"'.format(collection)
 
-    bot.say("{}{} {} {} (#{}{}{}), released {} — {}".format(
+    card_extras = ' | '.join(filter(None, [
+        types or '',
+        '{} set'.format(collection) if collection else '',
+    ]))
+    if card_extras:
+        card_extras = ' | {}'.format(card_extras)
+
+    bot.say("{}[#{}] {} | {} | {}{} | Released: {} | {}".format(
         prefix,
+        card_id,
         character,
         attribute,
         rarity,
-        card_id,
-        '; {}'.format(types) if types else '',
-        '; {} set'.format(collection) if collection else '',
+        card_extras,
         released,
         link,
     ))
