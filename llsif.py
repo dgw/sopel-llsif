@@ -89,6 +89,7 @@ def format_attribute(attribute):
 @module.commands('sifcard')
 @module.example('.sifcard')
 @module.example('.sifcard jp')
+@module.example('.sifcard birthday maki')
 @module.example('.sifcard 123')
 def sif_card(bot, trigger):
     """Fetch LLSIF EN/WW card information."""
@@ -101,12 +102,14 @@ def sif_card(bot, trigger):
         del params['japan_only']
         prefix = "Latest SIF JP card: "
     else:
-        if re.search(r'[^\d]', arg):
-            bot.reply("I can only search by card ID number right now. :(")
-            return
         params = COMMON_SEARCH_PARAMS.copy()
-        params.update({'ids': trigger.group(2)})
         prefix = ""
+        if re.search(r'[^\d]', arg):
+            # non-digits in query means run a keyword search
+            params.update({'search': arg})
+        else:
+            # query of only digits means run an ID number lookup
+            params.update({'ids': arg})
 
     try:
         data = _api_request(CARD_API, params)
