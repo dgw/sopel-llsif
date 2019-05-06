@@ -344,13 +344,6 @@ def sif_song(bot, trigger):
     duration = song['time']
     duration = "{}:{:0>2}".format(duration // 60, duration % 60)
 
-    title_extras = ''
-    if romaji_title or english_title:
-        title_extras = ' ({})'.format(', '.join(filter(None, [
-            formatting.italic(romaji_title) if romaji_title else '',
-            '"{}"'.format(english_title) if english_title else '',
-        ])))
-
     difficulties = []
     for level in ['easy', 'normal', 'hard', 'expert', 'master']:
         key_notes = level + '_notes'
@@ -368,7 +361,7 @@ def sif_song(bot, trigger):
     bot.say("{}{} [{}] | {}, in {} {} — {}"
         .format(
             title,
-            title_extras,
+            ' ({})'.format(formatting.italic(romaji_title)) if romaji_title else '',
             duration,
             attribute,
             main_unit,
