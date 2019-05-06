@@ -131,8 +131,30 @@ def sif_card(bot, trigger):
     released = card['release_date']
     link = card['website_url'].replace('http:', 'https:', 1)
 
-    bot.say("{}{} {} {} (#{}), released {} — {}"
-            .format(prefix, character, attribute, rarity, card_id, released, link))
+    collection = card.get('translated_collection', '')
+    if not collection:
+        # No localized name; use Japanese
+        collection = card.get('japanese_collection', '')
+        if not collection:
+            # No Japanese name either?! Give up, then.
+            pass
+        else:
+            # Quote name in Japanese style
+            collection = "「{}」".format(collection)
+    else:
+        # Quote name in English style
+        collection = '"{}"'.format(collection)
+
+    bot.say("{}{} {} {} (#{}{}), released {} — {}".format(
+        prefix,
+        character,
+        attribute,
+        rarity,
+        card_id,
+        ', {} set'.format(collection) if collection else '',
+        released,
+        link,
+    ))
 
 
 @module.commands('sifsong')
