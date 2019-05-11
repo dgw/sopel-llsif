@@ -96,6 +96,15 @@ IDOLS = {
 }
 
 
+RARITIES = {
+    'n': 'N',
+    'r': 'R',
+    'sr': 'SR',
+    'ssr': 'SSR',
+    'ur': 'UR',
+}
+
+
 # Make SURE to use a lowercase Greek mu (μ) if tweaking anything unit-related!
 # Typing <Compose>+mu on Linux yields a micro sign, which is a DIFFERENT code
 # point, and μ ≠ µ (confusingly, since in many fonts they look identical).
@@ -131,6 +140,10 @@ YEARS = {
 
 
 class APIError(Exception):
+    pass
+
+
+class InvalidQueryError(Exception):
     pass
 
 
@@ -217,14 +230,62 @@ def format_year(year):
     return YEARS[year]
 
 
+def parse_query(query):
+    """Parse plain-text query into a tuple of search parameters.
+
+    :param str query: Search query, in plain text, maybe containing keywords
+    :return: (text, attribute, rarity, want_promo, want_event)
+    :rtype: tuple
+    """
+    # Split query into words, discarding empty words
+    # (e.g. from double-spaces in the query)
+    words = filter(None, query.split(' '))
+    # Initialize state tracking
+    text = []
+    rarities = []
+    attribute = want_promo = want_event = None
+
+    for word in words:
+        _word = word.lower()
+        if _word in ATTRIBUTES.keys():
+            if attribute:
+                # Can't search for multiple attributes (they're mutually exclusive)
+                raise InvalidQueryError("You cannot search for multiple attributes.")
+            attribute = _word.title()
+            continue
+        if _word in RARITIES.keys():
+            rarities.append(_word.upper())
+            continue
+        if _word == 'promo':
+            want_promo = True
+            continue
+        if _word == 'non-promo' or _word == '!promo':
+            want_promo = False
+            continue
+        if _word == 'event':
+            want_event = True
+            continue
+        if _word == 'non-event' or _word == '!event':
+            want_event = False
+            continue
+        # Getting here means it's Just Another Keyword
+        text.append(word)
+
+    return ' '.join(text), attribute, ','.join(rarities), want_promo, want_event
+
 
 @module.commands('sifcard')
 @module.example('.sifcard')
 @module.example('.sifcard jp')
-@module.example('.sifcard birthday maki')
 @module.example('.sifcard 123')
+@module.example('.sifcard birthday maki ur')
 def sif_card(bot, trigger):
-    """Fetch LLSIF EN/WW card information."""
+    """Fetch LLSIF EN/WW card information.
+
+    Search by card number/ID, or by keywords.
+
+    Special keywords: attribute (Smile/Pure/Cool/All), rarity (N/R/SR/SSR/UR), event/non-event, promo/non-promo
+    """
     arg = trigger.group(2)
     params = {}
     url = CARD_API
@@ -240,7 +301,17 @@ def sif_card(bot, trigger):
         if re.search(r'[^\d]', arg):
             # non-digits in query means run a keyword search
             params = COMMON_SEARCH_PARAMS.copy()
-            params.update({'search': arg})
+            try:
+                text, attribute, rarities, promo, event = parse_query(arg)
+            except InvalidQueryError as err:
+                return bot.reply("You have an error in your query: {}".format(err))
+            params.update({
+                'search': text,
+                'attribute': attribute,
+                'rarity': rarities,
+                'is_promo': promo,
+                'is_event': event,
+            })
         else:
             # query of only digits means run an ID number lookup
             url = CARD_ONE.format(arg)
