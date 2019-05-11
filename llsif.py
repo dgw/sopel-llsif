@@ -96,6 +96,16 @@ IDOLS = {
 }
 
 
+IDOL_NICKNAMES = {
+    'kayo-chin': 'koizumi hanayo',
+    'kayochin': 'koizumi hanayo',
+    'pana': 'koizumi hanayo',
+
+    'riri': 'sakurauchi riko',
+    'yohane': 'tsushima yoshiko',
+}
+
+
 RARITIES = {
     'n': 'N',
     'r': 'R',
@@ -267,6 +277,9 @@ def parse_query(query):
             continue
         if _word == 'non-event' or _word == '!event':
             want_event = False
+            continue
+        if _word in IDOL_NICKNAMES.keys():
+            text.append(IDOL_NICKNAMES[_word])
             continue
         # Getting here means it's Just Another Keyword
         text.append(word)
