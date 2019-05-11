@@ -96,10 +96,19 @@ IDOLS = {
 }
 
 
+# Some of these are just for convenience, like preventing "umi" from pulling up
+# a card of "koizUMI hanayo" instead of "sonoda UMI", or handling alternate
+# name spellings (e.g. Eli/Eri).
+# Others are official nicknames the characters use for each other in-universe.
 IDOL_NICKNAMES = {
+    'elicchi': 'ayase eli',
+    'eri': 'ayase eli',
+    'ericchi': 'ayase eli',
     'kayo-chin': 'koizumi hanayo',
     'kayochin': 'koizumi hanayo',
+    'niko': 'yazawa nico',
     'pana': 'koizumi hanayo',
+    'umi': 'sonoda umi',
 
     'riri': 'sakurauchi riko',
     'yohane': 'tsushima yoshiko',
