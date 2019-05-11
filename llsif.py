@@ -357,6 +357,7 @@ def sif_card(bot, trigger):
 
     card_id = card['id']
     character = format_idol(card['idol']['name'])
+    school = card['idol']['school']
     attribute = format_attribute(card['attribute'])
     rarity = card['rarity']
     if card['is_promo']:
@@ -392,6 +393,7 @@ def sif_card(bot, trigger):
 
     card_extras = ' | '.join(filter(None, [
         types or '',
+        school or '',
         '{} set'.format(collection) if collection else '',
     ]))
     if card_extras:
