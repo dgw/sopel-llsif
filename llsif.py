@@ -366,6 +366,8 @@ def sif_card(bot, trigger):
         rarity = "Special " + rarity
     released = card['release_date']
     link = card['website_url'].replace('http:', 'https:', 1)
+    # remove stupid trailing directory after card ID
+    link = re.sub(r'(.+\/).+', r'\1', link)
 
     idol = card['idol']
     try:
