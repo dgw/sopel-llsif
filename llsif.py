@@ -90,7 +90,7 @@ IDOLS = {
     'takami chika': formatting.hex_color('Takami Chika', IDOL_COLORS['takami chika']),
     'tsushima yoshiko': formatting.hex_color(
         'Tsushima {} Yohane'.format(formatting.strikethrough('Yoshiko')),
-        IDOL_COLORS['ayase eli']
+        IDOL_COLORS['tsushima yoshiko']
     ),
     'watanabe you': formatting.hex_color('Watanabe You', IDOL_COLORS['watanabe you']),
 }
