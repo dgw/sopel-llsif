@@ -443,7 +443,10 @@ def sif_song(bot, trigger):
     attribute = format_attribute(song['attribute'])
     rotation = song['daily_rotation'] or 'A'  # API gives null if not B-sides, for some reason
     duration = song['time']
-    duration = "{}:{:0>2}".format(duration // 60, duration % 60)
+    if duration is None:
+        duration = '?:??'
+    else:
+        duration = "{}:{:0>2}".format(duration // 60, duration % 60)
 
     difficulties = []
     for level in ['easy', 'normal', 'hard', 'expert', 'master']:
