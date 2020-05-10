@@ -107,6 +107,7 @@ IDOL_NICKNAMES = {
     'kayo-chin': 'koizumi hanayo',
     'kayochin': 'koizumi hanayo',
     'niko': 'yazawa nico',
+    'nontan': 'toujou nozomi',
     'pana': 'koizumi hanayo',
     'umi': 'sonoda umi',
 
