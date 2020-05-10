@@ -100,11 +100,12 @@ IDOLS = {
 # a card of "koizUMI hanayo" instead of "sonoda UMI", or handling alternate
 # name spellings (e.g. Eli/Eri).
 # Others are official nicknames the characters use for each other in-universe.
+# In `parse_query()`, hyphens are removed from the input to reduce the amount of
+# duplication needed in this dictionary.
 IDOL_NICKNAMES = {
     'elicchi': 'ayase eli',
     'eri': 'ayase eli',
     'ericchi': 'ayase eli',
-    'kayo-chin': 'koizumi hanayo',
     'kayochin': 'koizumi hanayo',
     'niko': 'yazawa nico',
     'nontan': 'toujou nozomi',
@@ -266,7 +267,10 @@ def parse_query(query):
     attribute = want_promo = want_event = None
 
     for word in words:
-        _word = word.lower()
+        # Use lowercase version with hyphens removed for comparisons
+        # Hyphen filter helps avoid duplicating too many IDOL_NICKNAMES mappings
+        # (The benefit of transforming to lowercase is obvious.)
+        _word = word.lower().replace('-', '')
         if _word in ATTRIBUTES.keys():
             if attribute:
                 # Can't search for multiple attributes (they're mutually exclusive)
