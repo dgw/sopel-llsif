@@ -181,7 +181,11 @@ def _api_request(url, params={}):
     try:
         r.raise_for_status()
     except requests.exceptions.HTTPError as e:
-        raise APIError("HTTP error: " + e.message)
+        if r.status_code == 404:
+            # treat 404 as if the server sent an empty result
+            return {'results': []}
+        # otherwise bubble up the error message
+        raise APIError("HTTP error: " + str(e))
     try:
         data = r.json()
     except ValueError:
