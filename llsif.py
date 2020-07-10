@@ -1,7 +1,7 @@
 # coding=utf-8
 """
-llsif.py - Sopel Love Live! School Idol Festival module
-Copyright 2019 dgw
+llsif.py - Sopel Love Live! School Idol Festival plugin
+Copyright 2019-2020 dgw, technobabbl.es
 Licensed under the Eiffel Forum License 2
 
 https://sopel.chat
