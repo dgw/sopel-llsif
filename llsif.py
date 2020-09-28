@@ -195,7 +195,8 @@ def _api_request(url, params={}):
     return data
 
 
-def _bond_equation(combo):
+def _bond_points(combo):
+    """Get bond/kizuna points awarded for a given combo string."""
     under_200 = min(200, combo)
     over_200 = max(0, combo - 200)
     return (
@@ -205,31 +206,6 @@ def _bond_equation(combo):
         (over_200 // 50) +
         (5 * (combo // 100))
     )
-
-
-def _bond_loop(combo):
-    pts = 0
-    for i in range(1, combo):
-        mult_10  = i % 10  == 0
-        mult_50  = i % 50  == 0
-        mult_100 = i % 100 == 0
-        over_200 = i > 200
-        if mult_10 and not mult_50:
-            if not over_200:
-                pts += 1
-            else:
-                pts += 2
-        if mult_50 and not mult_100:
-            pts += 5
-        if mult_100:
-            pts += 10
-    return pts
-
-
-def _bond_points(combo):
-    """Get bond/kizuna points awarded for a given combo string."""
-    method = random.choice([_bond_equation, _bond_loop])
-    return method(combo)
 
 
 def format_attribute(attribute):
