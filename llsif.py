@@ -8,6 +8,7 @@ https://sopel.chat
 """
 from __future__ import unicode_literals, absolute_import, print_function, division
 
+import random
 import re
 
 import requests
@@ -168,6 +169,10 @@ class InvalidQueryError(Exception):
     pass
 
 
+class NoResultError(Exception):
+    pass
+
+
 def _api_request(url, params={}):
     try:
         r = requests.get(url=url, params=params,
@@ -192,6 +197,19 @@ def _api_request(url, params={}):
         raise APIError("Couldn't decode API response: " + r.content)
 
     return data
+
+
+def _bond_points(combo):
+    """Get bond/kizuna points awarded for a given combo string."""
+    under_200 = min(200, combo)
+    over_200 = max(0, combo - 200)
+    return (
+        (combo // 10) +
+        (over_200 // 10) +
+        (4 * (combo // 50)) -
+        (over_200 // 50) +
+        (5 * (combo // 100))
+    )
 
 
 def format_attribute(attribute):
@@ -422,26 +440,53 @@ def sif_card(bot, trigger):
     ))
 
 
-@module.commands('sifsong')
-@module.example('.sifsong snow halation')
-def sif_song(bot, trigger):
-    """Look up LLSIF live show information."""
+def _get_song(query):
     params = COMMON_SEARCH_PARAMS.copy()
-    if not trigger.group(2):
+    if not query:
         params.update({'ordering': 'random'})
     else:
-        params.update({'search': trigger.group(2)})
+        params.update({'search': query})
 
     try:
         data = _api_request(SONG_API, params)
     except APIError:
-        bot.say("Sorry, something went wrong with the song API.")
         LOGGER.exception("LLSIF API error!")
-        return
+        raise
 
     try:
         song = data['results'][0]
     except IndexError:
+        raise NoResultError
+
+    return song
+
+
+def _get_song_level_info(song):
+    info = {}
+
+    for level in ['easy', 'normal', 'hard', 'expert', 'master']:
+        key_notes = level + '_notes'
+        key_stars = level + '_difficulty'
+        # skip difficulty level if it has null for either value
+        if song[key_notes] and song[key_stars]:
+            info[level] = {
+                'stars': song[key_stars],
+                'notes': song[key_notes],
+            }
+
+    return info
+
+
+@module.commands('sifsong')
+@module.example('.sifsong snow halation')
+def sif_song(bot, trigger):
+    """Look up LLSIF live show information."""
+    try:
+        song = _get_song(trigger.group(2))
+    except APIError:
+        bot.say("Sorry, something went wrong with the song API.")
+        return
+    except NoResultError:
         bot.reply("No song found!")
         return
 
@@ -457,19 +502,14 @@ def sif_song(bot, trigger):
     else:
         duration = "{}:{:0>2}".format(duration // 60, duration % 60)
 
-    difficulties = []
-    for level in ['easy', 'normal', 'hard', 'expert', 'master']:
-        key_notes = level + '_notes'
-        key_stars = level + '_difficulty'
-        # skip difficulty level if it has null for either value
-        if song[key_notes] and song[key_stars]:
-            difficulties.append(
-                '{}: {}🟊, {} notes'.format(
-                    level.title(),
-                    song[key_stars],
-                    song[key_notes],
-                )
-            )
+    difficulties = [
+        '{}: {}🟊, {} notes, {} kizuna'.format(
+            level.title(),
+            info['stars'],
+            info['notes'],
+            _bond_points(info['notes']),
+        ) for level, info in _get_song_level_info(song).items()
+    ]
 
     bot.say("{}{} [{}] | {}, in {} {} — {}"
         .format(
