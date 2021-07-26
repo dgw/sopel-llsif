@@ -70,6 +70,12 @@ IDOL_COLORS = {
     'takami chika': 'F0A20B',
     'tsushima yoshiko': '898989',
     'watanabe you': '49B9F9',
+
+    'arashi chisato': 'FF6E91',
+    'hazuki ren': '0100A0',
+    'heanna sumire': '74F467',
+    'shibuya kanon': 'FF7F27',
+    'tang keke': 'A0FFF9',
 }
 IDOLS = {
     'ayase eli': formatting.hex_color('Ayase Eli', IDOL_COLORS['ayase eli']),
@@ -94,6 +100,12 @@ IDOLS = {
         IDOL_COLORS['tsushima yoshiko']
     ),
     'watanabe you': formatting.hex_color('Watanabe You', IDOL_COLORS['watanabe you']),
+
+    'arashi chisato': formatting.hex_color('Arashi Chisato', IDOL_COLORS['arashi chisato']),  # probably will have cards someday
+    'hazuki ren': formatting.hex_color('Hazuki Ren', IDOL_COLORS['hazuki ren']),  # probably will have cards someday
+    'heanna sumire': formatting.hex_color('Heanna Sumire', IDOL_COLORS['heanna sumire']),
+    'shibuya kanon': formatting.hex_color('Shibuya Kanon', IDOL_COLORS['shibuya kanon']),
+    'tang keke': formatting.hex_color('Tang Keke', IDOL_COLORS['tang keke']),
 }
 
 
@@ -115,6 +127,8 @@ IDOL_NICKNAMES = {
 
     'riri': 'sakurauchi riko',
     'yohane': 'tsushima yoshiko',
+
+    'kuku': 'tang keke',
 }
 
 
