@@ -61,6 +61,12 @@ IDOL_COLORS = {
     'toujou nozomi': '744791',
     'yazawa nico': 'D54E8D',
 
+    'kira tsubasa': 'C5A06B',
+    'toudou erena': '8F44A6',
+    # probably fine to have 'yuuki' as an alias for Setsuna
+    # A-RISE cards aren't very common
+    'yuuki anju': 'DD6722',
+
     'kunikida hanamaru': 'E6D617',
     'kurosawa dia': 'F23B4C',
     'kurosawa ruby': 'FB75E4',
@@ -81,6 +87,12 @@ IDOLS = {
     'sonoda umi': formatting.hex_color('Sonoda Umi', IDOL_COLORS['sonoda umi']),
     'toujou nozomi': formatting.hex_color('Toujou Nozomi', IDOL_COLORS['toujou nozomi']),
     'yazawa nico': formatting.hex_color('Yazawa Nico', IDOL_COLORS['yazawa nico']),
+
+    'kira tsubasa': formatting.hex_color('Kira Tsubasa', IDOL_COLORS['kira tsubasa']),
+    'toudou erena': formatting.hex_color('Toudou Erena', IDOL_COLORS['toudou erena']),
+    # probably fine to have 'yuuki' as an alias for Setsuna
+    # A-RISE cards aren't very common
+    'yuuki anju': formatting.hex_color('Yuuki Anju', IDOL_COLORS['yuuki anju']),
 
     'kunikida hanamaru': formatting.hex_color('Kunikida Hanamaru', IDOL_COLORS['kunikida hanamaru']),
     'kurosawa dia': formatting.hex_color('Kurosawa Dia', IDOL_COLORS['kurosawa dia']),
