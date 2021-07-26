@@ -70,6 +70,17 @@ IDOL_COLORS = {
     'takami chika': 'F0A20B',
     'tsushima yoshiko': '898989',
     'watanabe you': '49B9F9',
+
+    'asaka karin': '565EA9',
+    'emma verde': '8EC225',
+    'konoe kanata': 'B44E8F',
+    'miyashita ai': 'F18F3D',
+    'nakasu kasumi': 'FFE41C',
+    'ousaka shizuku': '73C9F3',
+    'shioriko mifune': '39B184',  # might be used someday?
+    'tennoji rina': '9AA3AA',
+    'uehara ayumu': 'EE879D',
+    'yuki setsuna': 'E94C53',
 }
 IDOLS = {
     'ayase eli': formatting.hex_color('Ayase Eli', IDOL_COLORS['ayase eli']),
@@ -94,6 +105,17 @@ IDOLS = {
         IDOL_COLORS['tsushima yoshiko']
     ),
     'watanabe you': formatting.hex_color('Watanabe You', IDOL_COLORS['watanabe you']),
+
+    'asaka karin': formatting.hex_color('Asaka Karin', IDOL_COLORS['asaka karin']),
+    'emma verde': formatting.hex_color('Emma Verde', IDOL_COLORS['emma verde']),
+    'konoe kanata': formatting.hex_color('Konoe Kanata', IDOL_COLORS['konoe kanata']),
+    'miyashita ai': formatting.hex_color('Miyashita Ai', IDOL_COLORS['miyashita ai']),
+    'nakasu kasumi': formatting.hex_color('Nakasu Kasumi', IDOL_COLORS['nakasu kasumi']),
+    'ousaka shizuku': formatting.hex_color('Ousaka Shizuku', IDOL_COLORS['ousaka shizuku']),
+    'shioriko mifune': formatting.hex_color('Shioriko Mifune', IDOL_COLORS['shioriko mifune']),  # might be used someday?
+    'tennoji rina': formatting.hex_color('Tennoji Rina', IDOL_COLORS['tennoji rina']),
+    'uehara ayumu': formatting.hex_color('Uehara Ayumu', IDOL_COLORS['uehara ayumu']),
+    'yuki setsuna': formatting.hex_color('Yuki Setsuna', IDOL_COLORS['yuki setsuna']),
 }
 
 
@@ -115,6 +137,10 @@ IDOL_NICKNAMES = {
 
     'riri': 'sakurauchi riko',
     'yohane': 'tsushima yoshiko',
+
+    'osaka': 'ousaka shizuku',
+    'tennouji': 'tennoji rina',
+    'yuuki': 'setsuna yuki',
 }
 
 
