@@ -147,7 +147,7 @@ IDOLS = {
 # a card of "koizUMI hanayo" instead of "sonoda UMI", or handling alternate
 # name spellings (e.g. Eli/Eri).
 # Others are official nicknames the characters use for each other in-universe.
-# In `parse_query()`, hyphens are removed from the input to reduce the amount of
+# In `parse_card_query()`, hyphens are removed from the input to reduce the amount of
 # duplication needed in this dictionary.
 IDOL_NICKNAMES = {
     'elicchi': 'ayase eli',
@@ -325,8 +325,8 @@ def format_year(year):
     return YEARS[year]
 
 
-def parse_query(query):
-    """Parse plain-text query into a tuple of search parameters.
+def parse_card_query(query):
+    """Parse plain-text query into a tuple of card search parameters.
 
     :param str query: Search query, in plain text, maybe containing keywords
     :return: (text, attribute, rarity, want_promo, want_event)
@@ -375,6 +375,41 @@ def parse_query(query):
     return ' '.join(text), attribute, ','.join(rarities), want_promo, want_event
 
 
+def parse_song_query(query):
+    """Parse plain-text query into a tuple of song search parameters.
+
+    :param str query: Search query, in plain text, maybe containing keywords
+    :return: (text, attribute, is_event)
+    :rtype: tuple
+    :raise InvalidQueryError: when the query contains conflicting operators
+    """
+    # Split query into words, discarding empty words
+    # (e.g. from double-spaces in the query)
+    words = filter(None, query.split(' '))
+    # Initialize state tracking
+    text = []
+    attribute = is_event = None
+
+    for word in words:
+        _word = word.lower().replace('-', '')
+        if _word in ATTRIBUTES.keys():
+            if attribute:
+                # Can't search for multiple attributes (they're mutually exclusive)
+                raise InvalidQueryError("You cannot search for multiple attributes.")
+            attribute = _word.title()
+            continue
+        if _word == 'event':
+            is_event = True
+            continue
+        if _word == 'non-event' or _word == '!event':
+            is_event = False
+            continue
+        # Getting here means it's Just Another Keyword
+        text.append(word)
+
+    return ' '.join(text), attribute, is_event
+
+
 @module.commands('sifcard')
 @module.example('.sifcard')
 @module.example('.sifcard jp')
@@ -403,7 +438,7 @@ def sif_card(bot, trigger):
             # non-digits in query means run a keyword search
             params = COMMON_SEARCH_PARAMS.copy()
             try:
-                text, attribute, rarities, promo, event = parse_query(arg)
+                text, attribute, rarities, promo, event = parse_card_query(arg)
             except InvalidQueryError as err:
                 return bot.reply("You have an error in your query: {}".format(err))
             params.update({
@@ -493,11 +528,26 @@ def sif_card(bot, trigger):
 
 
 def _get_song(query):
+    """Get a song from the API that matches the query.
+
+    :param str query: the user's search query
+    :return: the song object
+    :rtype: dict
+    :raise NoResultError: if the query doesn't match any songs
+    :raise APIError: if there is an error accessing the API
+    :raise InvalidQueryError: if the query contains conflicting operators
+    """
     params = COMMON_SEARCH_PARAMS.copy()
-    if not query:
+    if query:
+        text, attribute, is_event = parse_song_query(query)
+        params.update({
+            'search': text,
+            'attribute': attribute,
+            'is_event': is_event,
+        })
+
+    if not query or not text:
         params.update({'ordering': 'random'})
-    else:
-        params.update({'search': query})
 
     try:
         data = _api_request(SONG_API, params)
@@ -532,7 +582,11 @@ def _get_song_level_info(song):
 @module.commands('sifsong')
 @module.example('.sifsong snow halation')
 def sif_song(bot, trigger):
-    """Look up LLSIF live show information."""
+    """Look up LLSIF live show information.
+
+    Special keywords: song attribute (Smile, Pure, Cool), and whether the song
+    was an event song (event, !event, or non-event).
+    """
     try:
         song = _get_song(trigger.group(2))
     except APIError:
@@ -540,6 +594,9 @@ def sif_song(bot, trigger):
         return
     except NoResultError:
         bot.reply("No song found!")
+        return
+    except InvalidQueryError as err:
+        bot.reply("You have an error in your query: {}".format(err))
         return
 
     title = formatting.hex_color(song['name'], ATTRIBUTE_COLORS[song['attribute'].lower()])
