@@ -83,7 +83,7 @@ IDOL_COLORS = {
     'miyashita ai': 'F18F3D',
     'nakasu kasumi': 'FFE41C',
     'ousaka shizuku': '73C9F3',
-    'shioriko mifune': '39B184',  # might be used someday?
+    'mifune shioriko': '39B184',
     'tennoji rina': '9AA3AA',
     'uehara ayumu': 'EE879D',
     'yuki setsuna': 'E94C53',
@@ -130,13 +130,13 @@ IDOLS = {
     'miyashita ai': formatting.hex_color('Miyashita Ai', IDOL_COLORS['miyashita ai']),
     'nakasu kasumi': formatting.hex_color('Nakasu Kasumi', IDOL_COLORS['nakasu kasumi']),
     'ousaka shizuku': formatting.hex_color('Ousaka Shizuku', IDOL_COLORS['ousaka shizuku']),
-    'shioriko mifune': formatting.hex_color('Shioriko Mifune', IDOL_COLORS['shioriko mifune']),  # might be used someday?
+    'mifune shioriko': formatting.hex_color('Mifune Shioriko', IDOL_COLORS['mifune shioriko']),
     'tennoji rina': formatting.hex_color('Tennoji Rina', IDOL_COLORS['tennoji rina']),
     'uehara ayumu': formatting.hex_color('Uehara Ayumu', IDOL_COLORS['uehara ayumu']),
     'yuki setsuna': formatting.hex_color('Yuki Setsuna', IDOL_COLORS['yuki setsuna']),
 
-    'arashi chisato': formatting.hex_color('Arashi Chisato', IDOL_COLORS['arashi chisato']),  # probably will have cards someday
-    'hazuki ren': formatting.hex_color('Hazuki Ren', IDOL_COLORS['hazuki ren']),  # probably will have cards someday
+    'arashi chisato': formatting.hex_color('Arashi Chisato', IDOL_COLORS['arashi chisato']),
+    'hazuki ren': formatting.hex_color('Hazuki Ren', IDOL_COLORS['hazuki ren']),
     'heanna sumire': formatting.hex_color('Heanna Sumire', IDOL_COLORS['heanna sumire']),
     'shibuya kanon': formatting.hex_color('Shibuya Kanon', IDOL_COLORS['shibuya kanon']),
     'tang keke': formatting.hex_color('Tang Keke', IDOL_COLORS['tang keke']),
