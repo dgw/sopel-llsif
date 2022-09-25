@@ -16,13 +16,17 @@ import requests
 from scheduler import Scheduler
 import scheduler.trigger as schedule_trigger
 
+from sopel.config import types
 from sopel.logger import get_logger
 from sopel import formatting, module
 
 
 def _send_rc_5x(bot):
-    for channel in bot.channels.keys():
+    channels = bot.config.llsif.rc_5x_channels or bot.channels.keys()
+
+    for channel in channels:
         bot.say("[LLSIF] Rhythmic Carnival 5x EXP hour has started!", channel)
+
 
 UTC = datetime.timezone.utc
 
@@ -33,7 +37,17 @@ RC_5X_TIMES = [
 ]
 
 
+class LLSIFSection(types.StaticSection):
+    rc_5x_notify = types.BooleanAttribute('rc_5x_notify', default=False)
+    rc_5x_channels = types.ListAttribute('rc_5x_channels')
+
+
 def setup(bot):
+    bot.config.define_section('llsif', LLSIFSection)
+
+    if not bot.config.llsif.rc_5x_notify:
+        return
+
     schedule = Scheduler(tzinfo=UTC)
 
     scheduled_jobs = [
@@ -58,6 +72,9 @@ def shutdown(bot):
 
 @module.interval(30)
 def scheduler_run(bot):
+    if 'llsif_scheduler' not in bot.memory:
+        return
+
     bot.memory['llsif_scheduler'].exec_jobs()
 
 
