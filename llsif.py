@@ -1,20 +1,64 @@
 # coding=utf-8
 """
 llsif.py - Sopel Love Live! School Idol Festival plugin
-Copyright 2019-2020 dgw, technobabbl.es
+Copyright 2019-2022 dgw, technobabbl.es
 Licensed under the Eiffel Forum License 2
 
 https://sopel.chat
 """
 from __future__ import unicode_literals, absolute_import, print_function, division
 
+import datetime
 import random
 import re
 
 import requests
+from scheduler import Scheduler
+import scheduler.trigger as schedule_trigger
 
 from sopel.logger import get_logger
 from sopel import formatting, module
+
+
+def _send_rc_5x(bot):
+    for channel in bot.channels.keys():
+        bot.say("[LLSIF] Rhythmic Carnival 5x EXP hour has started!", channel)
+
+UTC = datetime.timezone.utc
+
+RC_5X_TIMES = [
+    datetime.time(hour=3, tzinfo=UTC),
+    datetime.time(hour=8, tzinfo=UTC),
+    datetime.time(hour=12, tzinfo=UTC),
+]
+
+
+def setup(bot):
+    schedule = Scheduler(tzinfo=UTC)
+
+    scheduled_jobs = [
+        schedule_trigger.Saturday(t) for t in RC_5X_TIMES
+    ]
+    scheduled_jobs += [
+        schedule_trigger.Sunday(t) for t in RC_5X_TIMES
+    ]
+
+    schedule.weekly(scheduled_jobs, _send_rc_5x, args=(bot,))
+
+    bot.memory['llsif_scheduler'] = schedule
+
+
+def shutdown(bot):
+    try:
+        bot.memory['llsif_scheduler'].delete_jobs()
+        del bot.memory['llsif_scheduler']
+    except KeyError:
+        pass
+
+
+@module.interval(30)
+def scheduler_run(bot):
+    bot.memory['llsif_scheduler'].exec_jobs()
 
 
 API_BASE = 'https://schoolido.lu/api/'
