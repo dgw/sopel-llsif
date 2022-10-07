@@ -1,20 +1,81 @@
 # coding=utf-8
 """
 llsif.py - Sopel Love Live! School Idol Festival plugin
-Copyright 2019-2020 dgw, technobabbl.es
+Copyright 2019-2022 dgw, technobabbl.es
 Licensed under the Eiffel Forum License 2
 
 https://sopel.chat
 """
 from __future__ import unicode_literals, absolute_import, print_function, division
 
+import datetime
 import random
 import re
 
 import requests
+from scheduler import Scheduler
+import scheduler.trigger as schedule_trigger
 
+from sopel.config import types
 from sopel.logger import get_logger
 from sopel import formatting, module
+
+
+def _send_rc_5x(bot):
+    channels = bot.config.llsif.rc_5x_channels or bot.channels.keys()
+
+    for channel in channels:
+        bot.say("[LLSIF] Rhythmic Carnival 5x EXP hour has started!", channel)
+
+
+UTC = datetime.timezone.utc
+
+RC_5X_TIMES = [
+    datetime.time(hour=3, tzinfo=UTC),
+    datetime.time(hour=8, tzinfo=UTC),
+    datetime.time(hour=12, tzinfo=UTC),
+]
+
+
+class LLSIFSection(types.StaticSection):
+    rc_5x_notify = types.BooleanAttribute('rc_5x_notify', default=False)
+    rc_5x_channels = types.ListAttribute('rc_5x_channels')
+
+
+def setup(bot):
+    bot.config.define_section('llsif', LLSIFSection)
+
+    if not bot.config.llsif.rc_5x_notify:
+        return
+
+    schedule = Scheduler(tzinfo=UTC)
+
+    scheduled_jobs = [
+        schedule_trigger.Saturday(t) for t in RC_5X_TIMES
+    ]
+    scheduled_jobs += [
+        schedule_trigger.Sunday(t) for t in RC_5X_TIMES
+    ]
+
+    schedule.weekly(scheduled_jobs, _send_rc_5x, args=(bot,))
+
+    bot.memory['llsif_scheduler'] = schedule
+
+
+def shutdown(bot):
+    try:
+        bot.memory['llsif_scheduler'].delete_jobs()
+        del bot.memory['llsif_scheduler']
+    except KeyError:
+        pass
+
+
+@module.interval(30)
+def scheduler_run(bot):
+    if 'llsif_scheduler' not in bot.memory:
+        return
+
+    bot.memory['llsif_scheduler'].exec_jobs()
 
 
 API_BASE = 'https://schoolido.lu/api/'
